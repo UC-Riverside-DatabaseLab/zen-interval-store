@@ -25,7 +25,7 @@ public:
   // overlap operator
   bool operator * (const TwoD_Interval& otherInterval) const {
     if (_low < otherInterval._low) return (_high >= otherInterval._low);
-    else return (otherInterval._high >= _low);}
+    return (otherInterval._high >= _low);}
 
 protected:
   std::string _id;
@@ -41,7 +41,7 @@ public:
   TwoD_IT_w_TopK();
   TwoD_IT_w_TopK(const std::string & filename);
 
-  void insertInterval(const std::string id, const std::string minKey, const std::string maxKey, const int maxTimestamp);
+  void insertInterval(const std::string id, const std::string minKey, const std::string maxKey, const long long maxTimestamp);
   void deleteInterval(const std::string id);
   std::vector<TwoD_Interval> topK(const std::string minKey, const std::string maxKey, const int k) const;
   void sync(const std::string & filename) const;
