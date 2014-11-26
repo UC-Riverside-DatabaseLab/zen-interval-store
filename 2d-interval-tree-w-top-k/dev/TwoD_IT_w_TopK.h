@@ -6,7 +6,7 @@
 #include <vector>
 
 
-//
+// 1d-interval in interval_dimension-time space
 class TwoD_Interval {
 public:
   TwoD_Interval(const std::string id, const std::string low, const std::string high, const long long max_timestamp)
@@ -24,6 +24,7 @@ public:
   
   // overlap operator
   bool operator * (const TwoD_Interval& otherInterval) const {
+    // point intersections are considered intersections
     if (_low < otherInterval._low) return (_high >= otherInterval._low);
     return (otherInterval._high >= _low);}
 
@@ -35,7 +36,7 @@ protected:
 };
 
 
-//
+// Storage and index for intervals
 class TwoD_IT_w_TopK {
 public:
   TwoD_IT_w_TopK();
