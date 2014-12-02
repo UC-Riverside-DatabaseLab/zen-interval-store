@@ -44,7 +44,7 @@ public:
 
   void insertInterval(const std::string id, const std::string minKey, const std::string maxKey, const long long maxTimestamp);
   void deleteInterval(const std::string id);
-  std::vector<TwoD_Interval> topK(const std::string minKey, const std::string maxKey, const int k) const;
+  void topK(std::vector<TwoD_Interval>* ret_value, const std::string minKey, const std::string maxKey, const int k) const;
   void sync(const std::string & filename) const;
 
 private:
