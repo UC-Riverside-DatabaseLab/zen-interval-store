@@ -7,43 +7,48 @@ int main() {
 TwoD_IT_w_TopK a;
 
 // Insert intervals (id, minKey, maxKey, maxTimestamp)
-std::cout<<std::endl<<"Inserting intervals:"<<std::endl
-         <<"(a,m,1)"<<std::endl
-         <<"(b,d,2)"<<std::endl
-         <<"(l,s,3)"<<std::endl
-         <<"(g,o,4)"<<std::endl
-         <<"(n,w,5)"<<std::endl
-         <<"(i,z,6)"<<std::endl
-         <<"(q,x,7)"<<std::endl
-         <<"(h,i,8)"<<std::endl
-         <<"(b,t,9)"<<std::endl;
-a.insertInterval("0", "a", "m", 1);
-a.insertInterval("1", "b", "d", 2);
-a.insertInterval("2", "l", "s", 3);
-a.insertInterval("3", "g", "o", 4);
-a.insertInterval("4", "n", "w", 5);
-a.insertInterval("5", "i", "z", 6);
-a.insertInterval("6", "q", "x", 7);
-a.insertInterval("7", "h", "i", 8);
-a.insertInterval("8", "b", "t", 9);
+std::cout<<std::endl<<"Inserting intervals (id, minKey, maxKey, maxTimestamp):"<<std::endl
+         <<"(0+2, a, m, 1)"<<std::endl
+         <<"(1, b, d, 4)"<<std::endl
+         <<"(2, l, s, 5)"<<std::endl
+         <<"(3, g, n, 8)"<<std::endl
+         <<"(4, n, w, 12)"<<std::endl
+         <<"(5, i, z, 16)"<<std::endl
+         <<"(6, q, x, 21)"<<std::endl
+         <<"(7, h, i, 25)"<<std::endl
+         <<"(0+2, b, n, 26)"<<std::endl
+         <<"(5, h, j, 27)"<<std::endl
+         <<"(8, b, t, 30)"<<std::endl;
+a.insertInterval("0+2", "a", "m", 1);
+a.insertInterval("1", "b", "d", 4);
+a.insertInterval("2", "l", "s", 5);
+a.insertInterval("3", "g", "n", 8);
+a.insertInterval("4", "n", "w", 12);
+a.insertInterval("5", "i", "z", 16);
+a.insertInterval("6", "q", "x", 21);
+a.insertInterval("7", "h", "i", 25);
+a.insertInterval("0+2", "b", "n", 26);
+a.insertInterval("5", "h", "j", 27);
+a.insertInterval("8", "b", "t", 30);
 
 // Call top-k (minKey, maxKey, k)
 std::cout<<std::endl<<"Top-4 intervals that overlap with (n,o):"<<std::endl;
 std::vector<TwoD_Interval> r;
 a.topK(&r, "n", "o", 4);
 for(std::vector<TwoD_Interval>::const_iterator it = r.begin(); it != r.end(); it++) {
-  std::cout<<"("<<it->GetLowPoint()<<","<<it->GetHighPoint()<<","<<it->GetMaxTimeStamp()<<")"<<std::endl;
+  std::cout<<"("<<it->GetId()<<", "<<it->GetLowPoint()<<", "<<it->GetHighPoint()<<", "<<it->GetMaxTimeStamp()<<")"<<std::endl;
   }
 
 // Delete interval (id)
-std::cout<<std::endl<<"Deleting (n,w)"<<std::endl;
+std::cout<<std::endl<<"Deleting intervals with ids 4 (i.e. (n,w)) and 0+2 (i.e. (b,n))"<<std::endl;
 a.deleteInterval("4");
+a.deleteInterval("0+2");
 
 std::cout<<std::endl<<"Top-4 intervals that overlap with (n,o):"<<std::endl;
 r.clear();
 a.topK(&r, "n", "o", 4);
 for(std::vector<TwoD_Interval>::const_iterator it = r.begin(); it != r.end(); it++) {
-  std::cout<<"("<<it->GetLowPoint()<<","<<it->GetHighPoint()<<","<<it->GetMaxTimeStamp()<<")"<<std::endl;
+  std::cout<<"("<<it->GetId()<<", "<<it->GetLowPoint()<<", "<<it->GetHighPoint()<<", "<<it->GetMaxTimeStamp()<<")"<<std::endl;
   }
 
 std::cout<<std::endl;
