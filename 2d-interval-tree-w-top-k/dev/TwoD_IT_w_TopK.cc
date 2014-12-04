@@ -37,19 +37,17 @@ split(id, '+', &r);
 
 //std::cout << std::endl << "Inserting " << r.front() << "," << r.back();
 
-if (ids.find(r.front()) == ids.end()) {
-  // create empty unordered_set for new key
-  ids[r.front()] = std::unordered_set<std::string>();
-}
-else if (r.back() == "" || ids[r.front()].find(r.back()) != ids[r.front()].end()) {
+if (ids.find(r.front()) != ids.end() && ids[r.front()].find(r.back()) != ids[r.front()].end()) {
   // existing id is being rewritten, so delete the old interval from storage
   deleteInterval(id);
 }
 
-if (r.back() != "") {
-  // id has the delimiter
-  ids[r.front()].insert(r.back());
+if (ids.find(r.front()) == ids.end()) {
+  // create empty unordered_set for new key
+  ids[r.front()] = std::unordered_set<std::string>();
 }
+
+ids[r.front()].insert(r.back());
 
 storage.push_back(TwoD_Interval(id, minKey, maxKey, maxTimestamp));
 
@@ -62,12 +60,10 @@ storage.remove(TwoD_Interval(id, "", "", 0LL));
 std::list<std::string> r;
 split(id, '+', &r);
 
-if (r.back() == "") {
-  // id does not have the delimiter
+ids[r.front()].erase(r.back());
+
+if (ids[r.front()].empty()) {
   ids.erase(r.front());
-}
-else {
-  ids[r.front()].erase(r.back());
 }
 
 };

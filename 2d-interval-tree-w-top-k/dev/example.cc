@@ -16,8 +16,8 @@ std::cout<<std::endl<<"Inserting intervals (id, minKey, maxKey, maxTimestamp):"<
          <<"(5, i, z, 16)"<<std::endl
          <<"(6, q, x, 21)"<<std::endl
          <<"(7, h, i, 25)"<<std::endl
-         <<"(0+2, b, n, 26)"<<std::endl
-         <<"(5, h, j, 27)"<<std::endl
+         <<"(0+2, b, n, 26) <- rewrite"<<std::endl
+         <<"(5, h, j, 27) <- rewrite"<<std::endl
          <<"(8, b, t, 30)"<<std::endl;
 a.insertInterval("0+2", "a", "m", 1);
 a.insertInterval("1", "b", "d", 4);
