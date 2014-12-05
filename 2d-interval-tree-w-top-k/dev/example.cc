@@ -8,9 +8,13 @@ int main() {
 std::cout<<std::endl<<"> Creating new interval store A with unparameterized constructor."<<std::endl;
 TwoD_IT_w_TopK a;
 
-// Setting delimiter
+// Set delimiter
 std::cout<<std::endl<<"> Setting delimiter for two-level IDs in A to + (default is also +)."<<std::endl;
 a.setIdDelimiter('+');
+
+// Set sync file name
+std::cout<<std::endl<<"> Setting sync file for A to test.txt."<<std::endl;
+a.setSyncFile("test.txt");
 
 // Insert intervals (id, minKey, maxKey, maxTimestamp)
 std::cout<<std::endl<<"> Inserting intervals (id, minKey, maxKey, maxTimestamp) into A:"<<std::endl
@@ -62,13 +66,13 @@ for(std::vector<TwoD_Interval>::const_iterator it = r.begin(); it != r.end(); it
 std::cout<<std::endl<<"> Deleting interval with id 4 (i.e. (n,w)) in A."<<std::endl;
 a.deleteInterval("4");
 
-// Save state in file
-std::cout<<std::endl<<"> Syncing A's current state to file test.txt."<<std::endl;
-a.syncToFile("test.txt");
+// Save state to sync file
+std::cout<<std::endl<<"> Syncing A's current state to file."<<std::endl;
+a.sync();
 
 // Construct new object from saved state
 std::cout<<std::endl<<"> Creating a new interval store B with state stored in file test.txt."<<std::endl;
-TwoD_IT_w_TopK b("test.txt");
+TwoD_IT_w_TopK b("test.txt", true);
 
 // Delete all intervals with common prefix (id_prefix)
 std::cout<<std::endl<<">> Deleting all intervals with ids starting with 0 (i.e. (b,n) and (c,o)) in A."<<std::endl;
