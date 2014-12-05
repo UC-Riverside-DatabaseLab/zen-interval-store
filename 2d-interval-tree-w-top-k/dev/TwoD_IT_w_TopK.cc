@@ -2,6 +2,7 @@
 #include "TwoD_IT_w_TopK.h"
 #include <algorithm>
 #include <functional>
+#include <fstream>
 #include <sstream>
 
 
@@ -31,7 +32,25 @@ id_delim = '+';
 
 
 //
-TwoD_IT_w_TopK::TwoD_IT_w_TopK(const std::string & filename) {};
+TwoD_IT_w_TopK::TwoD_IT_w_TopK(const std::string & filename) {
+
+// default id delimiter
+id_delim = '+';
+
+std::ifstream ifile(filename.c_str());
+
+if (ifile.is_open()) {
+  std::string id, minKey, maxKey;
+  long long maxTimestamp;
+
+  while (ifile>>id && ifile>>minKey && ifile>>maxKey && ifile>>maxTimestamp) {
+    insertInterval(id, minKey, maxKey, maxTimestamp);
+  }
+
+  ifile.close();
+}
+
+};
 
 
 //
@@ -63,6 +82,7 @@ storage.push_back(TwoD_Interval(id, minKey, maxKey, maxTimestamp));
 
 //
 void TwoD_IT_w_TopK::deleteInterval(const std::string id) {
+
 storage.remove(TwoD_Interval(id, "", "", 0LL));
 
 std::list<std::string> r;
@@ -83,12 +103,7 @@ std::list<std::string> intervals_to_delete;
 
 if (ids.find(id_prefix) != ids.end()) {
   for (std::unordered_set<std::string>::iterator it = ids[id_prefix].begin(); it != ids[id_prefix].end(); it++) {
-    if (*it == "") {
-      intervals_to_delete.push_back(id_prefix);
-    }
-    else {
-      intervals_to_delete.push_back(id_prefix + id_delim + *it);
-    }
+    intervals_to_delete.push_back((*it == "") ? id_prefix : id_prefix + id_delim + *it);
   }
   
   for (std::list<std::string>::iterator it = intervals_to_delete.begin(); it != intervals_to_delete.end(); it++) {
@@ -140,11 +155,27 @@ if (ret_value->size() > k) {
 
 
 //
-void TwoD_IT_w_TopK::sync(const std::string & filename) const {};
+void TwoD_IT_w_TopK::syncToFile(const std::string & filename) const {
+
+std::ofstream ofile(filename.c_str());
+
+if (ofile.is_open()) {
+  std::string out;
+  for (std::list<TwoD_Interval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
+    ofile << it->GetId() << std::endl
+          << it->GetLowPoint() << std::endl
+          << it->GetHighPoint() << std::endl
+          << it->GetMaxTimeStamp() << std::endl;
+  }
+
+ofile.close();
+}
+
+};
 
 
 //
-void TwoD_IT_w_TopK::changeIdDelimiter(const char new_delim) {
+void TwoD_IT_w_TopK::setIdDelimiter(const char new_delim) {
 id_delim = new_delim;
 
 };

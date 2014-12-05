@@ -55,9 +55,9 @@ public:
   void getInterval(TwoD_Interval *ret_interval, const std::string id) const;
   void topK(std::vector<TwoD_Interval> *ret_value, const std::string minKey, const std::string maxKey, const int k) const;
   
-  void sync(const std::string & filename) const;
+  void syncToFile(const std::string & filename) const;
   
-  void changeIdDelimiter(const char new_delim);
+  void setIdDelimiter(const char new_delim);
 
 private:
   std::list<TwoD_Interval> storage;
