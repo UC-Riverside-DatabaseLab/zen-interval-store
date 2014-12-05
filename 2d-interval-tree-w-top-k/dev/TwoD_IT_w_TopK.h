@@ -56,6 +56,7 @@ public:
   void topK(std::vector<TwoD_Interval> *ret_value, const std::string &minKey, const std::string &maxKey, const int &k) const;
   
   void sync() const;
+
   void setSyncFile(const std::string &filename);
   void getSyncFile(std::string *filename) const;
   void setSyncThreshold(const long &threshold);
@@ -73,7 +74,6 @@ private:
   std::string sync_file;
   long sync_threshold;
   mutable long sync_counter;
-  void incrementSyncCounter(const long &increment) const;
   
 };
 

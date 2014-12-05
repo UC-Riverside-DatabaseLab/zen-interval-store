@@ -19,7 +19,6 @@ elems->push_back(item1);
 
 std::getline(ss, item2);
 elems->push_back(item2);
-
 };
 
 
@@ -85,7 +84,7 @@ ids[r.front()].insert(r.back());
 
 storage.push_back(TwoD_Interval(id, minKey, maxKey, maxTimestamp));
 
-incrementSyncCounter(1);
+if (++sync_counter > sync_threshold) { sync(); }
 };
 
 
@@ -103,7 +102,7 @@ if (ids[r.front()].empty()) {
   ids.erase(r.front());
 }
 
-incrementSyncCounter(1);
+if (++sync_counter > sync_threshold) { sync(); }
 };
 
 
@@ -140,8 +139,6 @@ if (ids.find(r.front()) != ids.end()) {
 else {
   *ret_interval = TwoD_Interval("", "", "", 0LL);
 }
-
-incrementSyncCounter(1);
 };
 
 
@@ -161,8 +158,6 @@ std::sort(ret_value->begin(), ret_value->end(), std::greater<TwoD_Interval>());
 if (ret_value->size() > k) {
   ret_value->erase(ret_value->begin() + k, ret_value->end());
 }
-
-incrementSyncCounter(k);
 };
 
 
@@ -172,7 +167,6 @@ void TwoD_IT_w_TopK::sync() const {
 std::ofstream ofile(sync_file.c_str());
 
 if (ofile.is_open()) {
-  std::string out;
   for (std::list<TwoD_Interval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
     ofile << it->GetId() << std::endl
           << it->GetLowPoint() << std::endl
@@ -182,18 +176,8 @@ if (ofile.is_open()) {
 
 ofile.close();
 }
-};
 
-
-//
-void TwoD_IT_w_TopK::incrementSyncCounter(const long &increment) const {
-
-sync_counter += increment;
-
-if (sync_counter >= sync_threshold) {
-  sync();
-  sync_counter = 0;
-}
+sync_counter = 0;
 };
 
 
