@@ -5,6 +5,7 @@
 int main() {
 
 TwoD_IT_w_TopK a;
+a.changeIdDelimiter('+');
 
 // Insert intervals (id, minKey, maxKey, maxTimestamp)
 std::cout<<std::endl<<"Inserting intervals (id, minKey, maxKey, maxTimestamp):"<<std::endl
@@ -59,7 +60,7 @@ for(std::vector<TwoD_Interval>::const_iterator it = r.begin(); it != r.end(); it
   std::cout<<"("<<it->GetId()<<", "<<it->GetLowPoint()<<", "<<it->GetHighPoint()<<", "<<it->GetMaxTimeStamp()<<")"<<std::endl;
   }
 
-std::cout<<std::endl<<"Interval with id 1:"<<std::endl;
+std::cout<<std::endl<<"Querying interval with id 1:"<<std::endl;
 TwoD_Interval i;
 a.getInterval(&i, "1");
 std::cout<<"("<<i.GetId()<<", "<<i.GetLowPoint()<<", "<<i.GetHighPoint()<<", "<<i.GetMaxTimeStamp()<<")"<<std::endl;

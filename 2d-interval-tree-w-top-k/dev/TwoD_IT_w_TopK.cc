@@ -23,7 +23,11 @@ elems->push_back(item2);
 
 
 //
-TwoD_IT_w_TopK::TwoD_IT_w_TopK() {};
+TwoD_IT_w_TopK::TwoD_IT_w_TopK() {
+// default id delimiter
+id_delim = '+';
+
+};
 
 
 //
@@ -38,7 +42,7 @@ TwoD_IT_w_TopK::~TwoD_IT_w_TopK() {};
 void TwoD_IT_w_TopK::insertInterval(const std::string id, const std::string minKey, const std::string maxKey, const long long maxTimestamp) {
 
 std::list<std::string> r;
-split(&r, id, '+');
+split(&r, id, id_delim);
 
 if (ids.find(r.front()) != ids.end() && ids[r.front()].find(r.back()) != ids[r.front()].end()) {
   // existing id is being rewritten, so delete the old interval from storage
@@ -62,7 +66,7 @@ void TwoD_IT_w_TopK::deleteInterval(const std::string id) {
 storage.remove(TwoD_Interval(id, "", "", 0LL));
 
 std::list<std::string> r;
-split(&r, id, '+');
+split(&r, id, id_delim);
 
 ids[r.front()].erase(r.back());
 
@@ -83,7 +87,7 @@ if (ids.find(id_prefix) != ids.end()) {
       intervals_to_delete.push_back(id_prefix);
     }
     else {
-      intervals_to_delete.push_back(id_prefix + "+" + *it);
+      intervals_to_delete.push_back(id_prefix + id_delim + *it);
     }
   }
   
@@ -99,7 +103,7 @@ if (ids.find(id_prefix) != ids.end()) {
 void TwoD_IT_w_TopK::getInterval(TwoD_Interval *ret_interval, const std::string id) const {
 
 std::list<std::string> r;
-split(&r, id, '+');
+split(&r, id, id_delim);
 
 if (ids.find(r.front()) != ids.end()) {
   for (std::list<TwoD_Interval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
@@ -118,7 +122,7 @@ else {
 //
 void TwoD_IT_w_TopK::topK(std::vector<TwoD_Interval> *ret_value, const std::string minKey, const std::string maxKey, const int k) const {
 
-TwoD_Interval test("test", minKey, maxKey, 0LL);
+TwoD_Interval test("", minKey, maxKey, 0LL);
 
 for (std::list<TwoD_Interval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
   if (*it * test) {
@@ -137,5 +141,12 @@ if (ret_value->size() > k) {
 
 //
 void TwoD_IT_w_TopK::sync(const std::string & filename) const {};
+
+
+//
+void TwoD_IT_w_TopK::changeIdDelimiter(const char new_delim) {
+id_delim = new_delim;
+
+};
 
 

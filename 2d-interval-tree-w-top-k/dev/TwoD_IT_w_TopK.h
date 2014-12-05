@@ -8,6 +8,7 @@
 #include <vector>
 
 
+
 // 1d-interval in interval_dimension-time space
 class TwoD_Interval {
 public:
@@ -47,15 +48,22 @@ public:
   ~TwoD_IT_w_TopK();
 
   void insertInterval(const std::string id, const std::string minKey, const std::string maxKey, const long long maxTimestamp);
+  
   void deleteInterval(const std::string id);
   void deleteAllIntervals(const std::string id_prefix);
+  
   void getInterval(TwoD_Interval *ret_interval, const std::string id) const;
   void topK(std::vector<TwoD_Interval> *ret_value, const std::string minKey, const std::string maxKey, const int k) const;
+  
   void sync(const std::string & filename) const;
+  
+  void changeIdDelimiter(const char new_delim);
 
 private:
   std::list<TwoD_Interval> storage;
+  
   std::unordered_map<std::string, std::unordered_set<std::string> > ids;
+  char id_delim;
   
 };
 
