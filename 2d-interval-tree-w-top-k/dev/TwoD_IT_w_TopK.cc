@@ -65,6 +65,27 @@ ids[r.front()].erase(r.back());
 if (ids[r.front()].empty()) {
   ids.erase(r.front());
 }
+};
+
+//
+void TwoD_IT_w_TopK::deleteAllIntervals(const std::string id_prefix) {
+
+std::list<std::string> intervals_to_delete;
+
+if (ids.find(id_prefix) != ids.end()) {
+  for (std::unordered_set<std::string>::iterator it = ids[id_prefix].begin(); it != ids[id_prefix].end(); it++) {
+    if (*it == "") {
+      intervals_to_delete.push_back(id_prefix);
+    }
+    else {
+      intervals_to_delete.push_back(id_prefix + "+" + *it);
+    }
+  }
+  
+  for (std::list<std::string>::iterator it = intervals_to_delete.begin(); it != intervals_to_delete.end(); it++) {
+    deleteInterval(*it);
+  }
+}
 
 };
 
