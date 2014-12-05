@@ -11,6 +11,7 @@
 // 1d-interval in interval_dimension-time space
 class TwoD_Interval {
 public:
+  TwoD_Interval() {};
   TwoD_Interval(const std::string id, const std::string low, const std::string high, const long long max_timestamp)
     : _id(id), _low(low), _high(high), _max_timestamp(max_timestamp) {};
   
@@ -48,6 +49,7 @@ public:
   void insertInterval(const std::string id, const std::string minKey, const std::string maxKey, const long long maxTimestamp);
   void deleteInterval(const std::string id);
   void deleteAllIntervals(const std::string id_prefix);
+  void getInterval(TwoD_Interval *ret_interval, const std::string id) const;
   void topK(std::vector<TwoD_Interval> *ret_value, const std::string minKey, const std::string maxKey, const int k) const;
   void sync(const std::string & filename) const;
 
