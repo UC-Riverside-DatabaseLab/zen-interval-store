@@ -44,15 +44,28 @@ sync_counter = 0;
 sync_file = filename;
 
 if (sync_from_file) {
-  std::ifstream ifile(filename.c_str());
+  std::ifstream ifile(filename.c_str(), std::ios::out | std::ios::binary);
 
   if (ifile.is_open()) {
-    std::string id, minKey, maxKey;
-    uint64_t maxTimestamp;
+    //std::string id, minKey, maxKey;
+    //uint64_t maxTimestamp;
 
-    while (ifile>>id && ifile>>minKey && ifile>>maxKey && ifile>>maxTimestamp) {
-      insertInterval(id, minKey, maxKey, maxTimestamp);
-    }
+    //while (ifile>>id && ifile>>minKey && ifile>>maxKey && ifile>>maxTimestamp) {
+    //  insertInterval(id, minKey, maxKey, maxTimestamp);
+    //}
+    
+    ifile.seekg (0, std::ios::end);
+    std::streampos file_size = ifile.tellg();
+    
+    char *buffer;
+    buffer = new char[(uint64_t)file_size];
+    
+    ifile.seekg(0, std::ios::beg);
+    ifile.read(buffer, file_size);
+    
+    storage = (std::list<TwoD_Interval> )buffer;
+    
+    delete[] buffer;
     
     ifile.close();
   }
@@ -164,15 +177,17 @@ if (ret_value->size() > k) {
 //
 void TwoD_IT_w_TopK::sync() const {
 
-std::ofstream ofile(sync_file.c_str());
+std::ofstream ofile(sync_file.c_str(), std::ios::in | std::ios::binary);
 
 if (ofile.is_open()) {
-  for (std::list<TwoD_Interval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
-    ofile << it->GetId() << std::endl
-          << it->GetLowPoint() << std::endl
-          << it->GetHighPoint() << std::endl
-          << it->GetMaxTimeStamp() << std::endl;
-  }
+//  for (std::list<TwoD_Interval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
+//    ofile << it->GetId() << std::endl
+//          << it->GetLowPoint() << std::endl
+//          << it->GetHighPoint() << std::endl
+//          << it->GetMaxTimeStamp() << std::endl;
+//  }
+
+ofile.write((char *)&storage, sizeof(storage));
 
 ofile.close();
 }
