@@ -48,12 +48,12 @@ if (sync_from_file) {
 
   if (ifile.is_open()) {
     std::string id, minKey, maxKey;
-    long long maxTimestamp;
+    uint64_t maxTimestamp;
 
     while (ifile>>id && ifile>>minKey && ifile>>maxKey && ifile>>maxTimestamp) {
       insertInterval(id, minKey, maxKey, maxTimestamp);
     }
-
+    
     ifile.close();
   }
 }
@@ -65,7 +65,7 @@ TwoD_IT_w_TopK::~TwoD_IT_w_TopK() { sync(); };
 
 
 //
-void TwoD_IT_w_TopK::insertInterval(const std::string &id, const std::string &minKey, const std::string &maxKey, const long long &maxTimestamp) {
+void TwoD_IT_w_TopK::insertInterval(const std::string &id, const std::string &minKey, const std::string &maxKey, const uint64_t &maxTimestamp) {
 
 std::list<std::string> r;
 split(&r, id, id_delim);
@@ -186,8 +186,8 @@ sync_counter = 0;
 void TwoD_IT_w_TopK::setSyncFile(const std::string &filename) { sync_file = filename; };
 void TwoD_IT_w_TopK::getSyncFile(std::string *filename) const { *filename = sync_file; };
 
-void TwoD_IT_w_TopK::setSyncThreshold(const long &threshold) { sync_threshold = threshold; };
-void TwoD_IT_w_TopK::getSyncThreshold(long *threshold) const { *threshold = sync_threshold; };
+void TwoD_IT_w_TopK::setSyncThreshold(const uint32_t &threshold) { sync_threshold = threshold; };
+void TwoD_IT_w_TopK::getSyncThreshold(uint32_t *threshold) const { *threshold = sync_threshold; };
 
 void TwoD_IT_w_TopK::setIdDelimiter(const char &delim) { id_delim = delim; };
 void TwoD_IT_w_TopK::getIdDelimiter(char *delim) const { *delim = id_delim; };
