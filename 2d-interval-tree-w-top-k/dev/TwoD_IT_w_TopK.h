@@ -49,9 +49,10 @@ protected:
 // Interval tree node
 class TwoD_IT_Node {
 public:
-  TwoD_IT_Node() : left(nullptr), right(nullptr), parent(nullptr) {};
+  TwoD_IT_Node() : is_red(false) {};
 
   TwoD_Interval *interval;
+  bool is_red;
   //std::string max_high;
   //uint64_t max_timestamp;
   TwoD_IT_Node *left, *right, *parent;
@@ -87,11 +88,15 @@ public:
 
 private:
   
+  void treeInsert(TwoD_IT_Node* z);
+  void treeDelete(TwoD_IT_Node* z);
   void recursivePrintTree(TwoD_IT_Node* x) const;
   TwoD_IT_Node* treeMinimum(TwoD_IT_Node* x) const;
   TwoD_IT_Node* treeSuccessor(TwoD_IT_Node* x) const;
+  void treeLeftRotate(TwoD_IT_Node* x);
+  void treeRightRotate(TwoD_IT_Node* x);
   
-  TwoD_IT_Node* root;
+  TwoD_IT_Node *root, nil;
   std::unordered_map<std::string, TwoD_Interval> storage;
   
   std::unordered_map<std::string, std::unordered_set<std::string> > ids;

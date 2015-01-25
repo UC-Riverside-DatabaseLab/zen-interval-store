@@ -32,7 +32,7 @@ id_delim = '+';
 sync_threshold = 10000;
 sync_counter = 0;
 sync_file = "interval.str";
-root = nullptr;
+root = &nil;
 };
 
 
@@ -43,7 +43,7 @@ TwoD_IT_w_TopK::TwoD_IT_w_TopK(const std::string &filename, const bool &sync_fro
 id_delim = '+';
 sync_threshold = 10000;
 sync_counter = 0;
-root = nullptr;
+root = &nil;
 
 sync_file = filename;
 
@@ -72,7 +72,7 @@ TwoD_IT_w_TopK::~TwoD_IT_w_TopK() { sync(); };
 void TwoD_IT_w_TopK::insertInterval(const std::string &id, const std::string &minKey, const std::string &maxKey, const uint64_t &maxTimestamp) {
 
 try {
-  TwoD_IT_Node *z = new TwoD_IT_Node, *y = nullptr, *x = root;
+  TwoD_IT_Node *z = new TwoD_IT_Node;
   
   std::list<std::string> r;
   split(r, id, id_delim);
@@ -87,27 +87,13 @@ try {
   }
   
   ids[r.front()].insert(r.back());
+  
   storage[id]=TwoD_Interval(id, minKey, maxKey, maxTimestamp);
-  z->interval = &(storage.find(id)->second);
   storage.find(id)->second.tree_node = z;
   
-  while (x != nullptr) {
-    y = x;
-    if (z->interval->GetLowPoint() < x->interval->GetLowPoint())
-      x = x->left;
-    else
-      x = x->right;
-  }
-  
-  z->parent = y;
-  if (y == nullptr)
-    root = z;
-  else
-    if (z->interval->GetLowPoint() < y->interval->GetLowPoint())
-      y->left = z;
-    else
-      y->right = z;
-  
+  z->interval = &(storage.find(id)->second);
+  treeInsert(z);
+    
   if (++sync_counter > sync_threshold) { sync(); }
 }
 catch(std::exception &e) {
@@ -125,39 +111,11 @@ if (storage.find(id) != storage.end()) {
   split(r, id, id_delim);
   
   ids[r.front()].erase(r.back());
-  
   if (ids[r.front()].empty())
     ids.erase(r.front());
   
-  TwoD_IT_Node *z = storage.find(id)->second.tree_node, *y, *x;
-  
-  if (z->left == nullptr || z->right == nullptr)
-    y = z;
-  else
-    y = treeSuccessor(z);
-  
-  if (y->left != nullptr)
-    x = y->left;
-  else
-    x = y->right;
-  
-  if (x != nullptr)
-    x->parent = y->parent;
-  
-  if (y->parent == nullptr)
-    root = x;
-  else
-    if (y == y->parent->left)
-      y->parent->left = x;
-    else
-      y->parent->right = x;
-  
-  if (y != z) {
-    z->interval = y->interval;
-    z->interval->tree_node = z;
-  }
-  
-  delete y;
+  treeDelete(storage.find(id)->second.tree_node);
+
   storage.erase(id);
 
   if (++sync_counter > sync_threshold) { sync(); }
@@ -224,45 +182,6 @@ std::cout<<std::endl;
 
 
 //
-void TwoD_IT_w_TopK::recursivePrintTree(TwoD_IT_Node* x) const {
-
-if (x != nullptr) {
-  recursivePrintTree(x->left);
-  std::cout<<" "<<"("<<x->interval->GetId()<<", "<<x->interval->GetLowPoint()<<", "<<x->interval->GetHighPoint()
-           <<", "<<x->interval->GetTimeStamp()<<")";
-  recursivePrintTree(x->right);
-}
-};
-
-
-//
-TwoD_IT_Node* TwoD_IT_w_TopK::treeMinimum(TwoD_IT_Node* x) const {
-
-while (x->left != nullptr)
-  x = x->left;
-
-return x;
-};
-
-
-//
-TwoD_IT_Node* TwoD_IT_w_TopK::treeSuccessor(TwoD_IT_Node* x) const {
-
-if (x->right != nullptr)
-  return treeMinimum(x->right);
-
-TwoD_IT_Node* y = x->parent;
-
-while (y != nullptr && x == y->right) {
-  x = x->parent;
-  y = y->parent;
-}
-
-return y;
-};
-
-
-//
 void TwoD_IT_w_TopK::sync() const {
 
 std::ofstream ofile(sync_file.c_str());
@@ -283,7 +202,147 @@ sync_counter = 0;
 
 
 //
+void TwoD_IT_w_TopK::treeInsert(TwoD_IT_Node* z) {
+TwoD_IT_Node *y = &nil, *x = root;
 
+z->left = &nil;
+z->right = &nil;
+
+while (x != &nil) {
+  y = x;
+  if (z->interval->GetLowPoint() < x->interval->GetLowPoint())
+    x = x->left;
+  else
+    x = x->right;
+}
+
+z->parent = y;
+if (y == &nil)
+  root = z;
+else
+  if (z->interval->GetLowPoint() < y->interval->GetLowPoint())
+    y->left = z;
+  else
+    y->right = z;
+};
+
+
+//
+void TwoD_IT_w_TopK::treeDelete(TwoD_IT_Node* z) {
+TwoD_IT_Node *y, *x;
+  
+if (z->left == &nil || z->right == &nil)
+  y = z;
+else
+  y = treeSuccessor(z);
+
+if (y->left != &nil)
+  x = y->left;
+else
+  x = y->right;
+
+if (x != &nil)
+  x->parent = y->parent;
+
+if (y->parent == &nil)
+  root = x;
+else
+  if (y == y->parent->left)
+    y->parent->left = x;
+  else
+    y->parent->right = x;
+
+if (y != z) {
+  z->interval = y->interval;
+  z->interval->tree_node = z;
+}
+
+delete y;
+};
+
+
+//
+void TwoD_IT_w_TopK::recursivePrintTree(TwoD_IT_Node* x) const {
+
+if (x != &nil) {
+  recursivePrintTree(x->left);
+  std::cout<<" "<<"("<<x->interval->GetId()<<", "<<x->interval->GetLowPoint()<<", "<<x->interval->GetHighPoint()
+           <<", "<<x->interval->GetTimeStamp()<<")";
+  recursivePrintTree(x->right);
+}
+};
+
+
+//
+TwoD_IT_Node* TwoD_IT_w_TopK::treeMinimum(TwoD_IT_Node* x) const {
+
+while (x->left != &nil)
+  x = x->left;
+
+return x;
+};
+
+
+//
+TwoD_IT_Node* TwoD_IT_w_TopK::treeSuccessor(TwoD_IT_Node* x) const {
+
+if (x->right != &nil)
+  return treeMinimum(x->right);
+
+TwoD_IT_Node* y = x->parent;
+
+while (y != &nil && x == y->right) {
+  x = x->parent;
+  y = y->parent;
+}
+
+return y;
+};
+
+
+//
+void TwoD_IT_w_TopK::treeLeftRotate(TwoD_IT_Node* x) {
+
+TwoD_IT_Node* y = x->right;
+x->right = y->left;
+y->left->parent = x;
+y->parent = x->parent;
+
+if (x->parent == &nil)
+  root = y;
+else
+  if (x == x->parent->left)
+    x->parent->left = y;
+  else
+    x->parent->right = y;
+
+y->left= x;
+x->parent = y;
+};
+
+
+//
+void TwoD_IT_w_TopK::treeRightRotate(TwoD_IT_Node* x) {
+
+TwoD_IT_Node* y = x->left;
+x->left = y->right;
+y->right->parent = x;
+y->parent = x->parent;
+
+if (x->parent == &nil)
+  root = y;
+else
+  if (x == x->parent->right)
+    x->parent->right = y;
+  else
+    x->parent->left = y;
+
+y->right= x;
+x->parent = y;
+};
+
+
+//
 void TwoD_IT_w_TopK::setSyncFile(const std::string &filename) { sync_file = filename; };
 void TwoD_IT_w_TopK::getSyncFile(std::string &filename) const { filename = sync_file; };
 
