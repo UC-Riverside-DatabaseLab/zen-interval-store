@@ -89,7 +89,9 @@ public:
 private:
   
   void treeInsert(TwoD_IT_Node* z);
+  void treeInsertFixup(TwoD_IT_Node* z);
   void treeDelete(TwoD_IT_Node* z);
+  void treeDeleteFixup(TwoD_IT_Node* x);
   void recursivePrintTree(TwoD_IT_Node* x) const;
   TwoD_IT_Node* treeMinimum(TwoD_IT_Node* x) const;
   TwoD_IT_Node* treeSuccessor(TwoD_IT_Node* x) const;

@@ -54,7 +54,7 @@ if (sync_from_file) {
     std::string id, minKey, maxKey;
     uint64_t timestamp;
 
-    while (ifile>>id && ifile>>minKey && ifile>>maxKey && ifile>>timestamp) {
+    while (ifile>>id and ifile>>minKey and ifile>>maxKey and ifile>>timestamp) {
       insertInterval(id, minKey, maxKey, timestamp);
     }
     
@@ -146,7 +146,7 @@ void TwoD_IT_w_TopK::getInterval(TwoD_Interval &ret_interval, const std::string 
 std::list<std::string> r;
 split(r, id, id_delim);
 
-if (ids.find(r.front()) != ids.end() && ids.at(r.front()).find(r.back()) != ids.at(r.front()).end())
+if (ids.find(r.front()) != ids.end() and ids.at(r.front()).find(r.back()) != ids.at(r.front()).end())
   ret_interval = storage.at(id);
 else
   ret_interval = TwoD_Interval("", "", "", 0LL);
@@ -205,9 +205,6 @@ sync_counter = 0;
 void TwoD_IT_w_TopK::treeInsert(TwoD_IT_Node* z) {
 TwoD_IT_Node *y = &nil, *x = root;
 
-z->left = &nil;
-z->right = &nil;
-
 while (x != &nil) {
   y = x;
   if (z->interval->GetLowPoint() < x->interval->GetLowPoint())
@@ -224,6 +221,59 @@ else
     y->left = z;
   else
     y->right = z;
+
+z->left = &nil;
+z->right = &nil;
+z->is_red = true;
+
+treeInsertFixup(z);
+};
+
+
+//
+void TwoD_IT_w_TopK::treeInsertFixup(TwoD_IT_Node* z) {
+TwoD_IT_Node *y;
+
+while (z->parent->is_red) {
+  if (z->parent == z->parent->parent->left) {
+    y = z->parent->parent->right;
+    if (y->is_red) {
+      z->parent->is_red = false;
+      y->is_red = false;
+      z->parent->parent->is_red = true;
+      z = z->parent->parent;
+    }
+    else {
+      if (z == z->parent->right) {
+        z = z->parent;
+        treeLeftRotate(z);
+      }
+      z->parent->is_red = false;
+      z->parent->parent->is_red = true;
+      treeRightRotate(z->parent->parent);
+    }
+  }
+  else {
+    y = z->parent->parent->left;
+    if (y->is_red) {
+      z->parent->is_red = false;
+      y->is_red = false;
+      z->parent->parent->is_red = true;
+      z = z->parent->parent;
+    }
+    else {
+      if (z == z->parent->left) {
+        z = z->parent;
+        treeRightRotate(z);
+      }
+      z->parent->is_red = false;
+      z->parent->parent->is_red = true;
+      treeLeftRotate(z->parent->parent);
+    }
+  }
+}
+
+root->is_red = false;
 };
 
 
@@ -231,7 +281,7 @@ else
 void TwoD_IT_w_TopK::treeDelete(TwoD_IT_Node* z) {
 TwoD_IT_Node *y, *x;
   
-if (z->left == &nil || z->right == &nil)
+if (z->left == &nil or z->right == &nil)
   y = z;
 else
   y = treeSuccessor(z);
@@ -241,8 +291,7 @@ if (y->left != &nil)
 else
   x = y->right;
 
-if (x != &nil)
-  x->parent = y->parent;
+x->parent = y->parent;
 
 if (y->parent == &nil)
   root = x;
@@ -257,7 +306,72 @@ if (y != z) {
   z->interval->tree_node = z;
 }
 
+if (!y->is_red)
+  treeDeleteFixup(x);
+
 delete y;
+};
+
+
+//
+void TwoD_IT_w_TopK::treeDeleteFixup(TwoD_IT_Node* x) {
+TwoD_IT_Node *w;
+
+while (x != root and !x->is_red) {
+  if (x == x->parent->left) {
+    w = x->parent->right;
+    if (w->is_red) {
+      w->is_red = false;
+      x->parent->is_red = true;
+      treeLeftRotate(x->parent);
+      w = x->parent->right;
+    }
+    if (!w->left->is_red and !w->right->is_red) {
+      w->is_red = true;
+      x = x->parent;
+    }
+    else {
+      if (!w->right->is_red) {
+        w->left->is_red = false;
+        w->is_red = true;
+        treeRightRotate(w);
+        w = x->parent->right;
+      }
+      w->is_red = x->parent->is_red;
+      x->parent->is_red = false;
+      w->right->is_red = false;
+      treeLeftRotate(x->parent);
+      x = root;
+    }
+  }
+  else {
+    w = x->parent->left;
+    if (w->is_red) {
+      w->is_red = false;
+      x->parent->is_red = true;
+      treeRightRotate(x->parent);
+      w = x->parent->left;
+    }
+    if (!w->left->is_red and !w->right->is_red) {
+      w->is_red = true;
+      x = x->parent;
+    }
+    else {
+      if (!w->left->is_red) {
+        w->right->is_red = false;
+        w->is_red = true;
+        treeLeftRotate(w);
+        w = x->parent->left;
+      }
+      w->is_red = x->parent->is_red;
+      x->parent->is_red = false;
+      w->left->is_red = false;
+      treeRightRotate(x->parent);
+      x = root;
+    }
+  }
+}
+
 };
 
 
@@ -291,7 +405,7 @@ if (x->right != &nil)
 
 TwoD_IT_Node* y = x->parent;
 
-while (y != &nil && x == y->right) {
+while (y != &nil and x == y->right) {
   x = x->parent;
   y = y->parent;
 }
