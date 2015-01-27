@@ -5,6 +5,7 @@
 #include <functional>
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <sstream>
 
 
@@ -21,6 +22,28 @@ elems.push_back(item1);
 
 std::getline(ss, item2);
 elems.push_back(item2);
+};
+
+
+//
+static std::string max(std::string a, std::string b) {
+if (a>b)
+  return a;
+
+return b;
+};
+
+
+//
+static std::string max(std::string a, std::string b, std::string c) {
+if (a>b)
+  if (a>c)
+    return a;
+else
+  if (b>c)
+    return b;
+
+return c;
 };
 
 
@@ -72,6 +95,9 @@ TwoD_IT_w_TopK::~TwoD_IT_w_TopK() { sync(); };
 void TwoD_IT_w_TopK::insertInterval(const std::string &id, const std::string &minKey, const std::string &maxKey, const uint64_t &maxTimestamp) {
 
 try {
+  if (id == "")
+    throw std::runtime_error("Empty interval ID string");
+  
   TwoD_IT_Node *z = new TwoD_IT_Node;
   
   std::list<std::string> r;
@@ -205,8 +231,11 @@ sync_counter = 0;
 void TwoD_IT_w_TopK::treeInsert(TwoD_IT_Node* z) {
 TwoD_IT_Node *y = &nil, *x = root;
 
+z->max_high = z->interval->GetHighPoint();
 while (x != &nil) {
   y = x;
+  if (y->max_high < z->max_high)
+    y->max_high = z->max_high;
   if (z->interval->GetLowPoint() < x->interval->GetLowPoint())
     x = x->left;
   else
@@ -279,7 +308,7 @@ root->is_red = false;
 
 //
 void TwoD_IT_w_TopK::treeDelete(TwoD_IT_Node* z) {
-TwoD_IT_Node *y, *x;
+TwoD_IT_Node *y, *x, *w;
   
 if (z->left == &nil or z->right == &nil)
   y = z;
@@ -304,6 +333,12 @@ else
 if (y != z) {
   z->interval = y->interval;
   z->interval->tree_node = z;
+}
+
+w = y->parent;
+while (w != &nil) {
+  treeSetMaxHigh(w);
+  w = w->parent;
 }
 
 if (!y->is_red)
@@ -432,6 +467,9 @@ else
 
 y->left= x;
 x->parent = y;
+
+treeSetMaxHigh(x);
+treeSetMaxHigh(y);
 };
 
 
@@ -453,6 +491,25 @@ else
 
 y->right= x;
 x->parent = y;
+
+treeSetMaxHigh(x);
+treeSetMaxHigh(y);
+};
+
+
+//
+void TwoD_IT_w_TopK::treeSetMaxHigh(TwoD_IT_Node* x) {
+
+if (x->left != &nil)
+  if (x->right != &nil)
+    x->max_high = max(x->interval->GetHighPoint(), x->left->max_high, x->right->max_high);
+  else
+    x->max_high = max(x->interval->GetHighPoint(), x->left->max_high);
+else
+  if (x->right != &nil)
+    x->max_high = max(x->interval->GetHighPoint(), x->right->max_high);
+  else
+    x->max_high = x->interval->GetHighPoint();
 };
 
 

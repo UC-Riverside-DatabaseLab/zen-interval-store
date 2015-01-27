@@ -1,7 +1,6 @@
 #ifndef TWOD_IT_W_TOPK_H
 #define TWOD_IT_W_TOPK_H
 
-#include <list>
 #include <inttypes.h>
 #include <string>
 #include <unordered_map>
@@ -53,7 +52,7 @@ public:
 
   TwoD_Interval *interval;
   bool is_red;
-  //std::string max_high;
+  std::string max_high;
   //uint64_t max_timestamp;
   TwoD_IT_Node *left, *right, *parent;
 };
@@ -97,6 +96,7 @@ private:
   TwoD_IT_Node* treeSuccessor(TwoD_IT_Node* x) const;
   void treeLeftRotate(TwoD_IT_Node* x);
   void treeRightRotate(TwoD_IT_Node* x);
+  void treeSetMaxHigh(TwoD_IT_Node* x);
   
   TwoD_IT_Node *root, nil;
   std::unordered_map<std::string, TwoD_Interval> storage;
