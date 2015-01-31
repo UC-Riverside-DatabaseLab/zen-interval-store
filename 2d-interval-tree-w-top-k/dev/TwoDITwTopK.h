@@ -143,7 +143,8 @@ private:
   TwoDInterval *_ret_int, search_int;
   
   bool iterator_in_use;
-  std::vector<TwoDITNode*> nodes;
+  std::vector<std::pair<TwoDITNode*, uint64_t>> nodes;
+  std::unordered_set<TwoDITNode*> explored;
 
 };
 

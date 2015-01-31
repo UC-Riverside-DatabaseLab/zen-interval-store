@@ -111,7 +111,7 @@ void TwoDITwTopK::insertInterval(const std::string &id, const std::string &minKe
 
 try {
   if (iterator_in_use)
-    throw std::runtime_error("Cannot insert interval while an iterator is in use.");
+    throw std::runtime_error("Interval tree locked by iterator.");
   
   if (id == "")
     throw std::runtime_error("Empty interval ID string");
@@ -148,6 +148,11 @@ catch(std::exception &e) {
 
 //
 void TwoDITwTopK::deleteInterval(const std::string &id) {
+
+if(iterator_in_use) {
+  std::cerr<<std::endl<<"Delete failure: Interval tree locked by iterator."<<std::endl;
+  return;
+}
 
 if (storage.find(id) != storage.end()) {
   
@@ -661,9 +666,9 @@ delete x;
 
 
 //
-static bool heapCompare(const TwoDITNode *a, const TwoDITNode *b) {
+static bool heapCompare(const std::pair<TwoDITNode*, uint64_t> &a, const std::pair<TwoDITNode*, uint64_t> &b) {
 
-if (a->interval->GetTimeStamp() > b->interval->GetTimeStamp())
+if (a.second < b.second)
   return true;
 
 return false;
@@ -677,7 +682,7 @@ _it = &it;
 _ret_int = &ret_int;
 
 if(!start(min, max))
-  std::cerr<<"Interval tree is either empty or locked by another iterator."<<std::endl;
+  std::cerr<<std::endl<<"Start failure: Interval tree is either empty or locked by another iterator."<<std::endl;
 };
 
 
@@ -698,29 +703,49 @@ bool TopKIterator::next() {
 if (iterator_in_use) {
   
   TwoDITNode *x;
+  uint64_t p;
   
   while (!nodes.empty()) {
     
-    std::push_heap(nodes.begin(), nodes.end(), heapCompare);
-    x = nodes.back();
+    std::pop_heap(nodes.begin(), nodes.end(), heapCompare);
+    x = nodes.back().first;
+    p = nodes.back().second;
     nodes.pop_back();
     
-    if (x->left != &(_it->nil) and x->left->max_high >= search_int.GetLowPoint()) {
-      
-      nodes.push_back(x->left);
-      std::push_heap(nodes.begin(), nodes.end(), heapCompare);
+    if (explored.find(x) == explored.end()) {
+    
+      // branch by exploring children and bound from untenable sub-trees
+      if ((x->left != &(_it->nil)) and (x->left->max_high >= search_int.GetLowPoint())) {
+        
+        nodes.push_back(std::make_pair(x->left, x->left->max_timestamp));
+        std::push_heap(nodes.begin(), nodes.end(), heapCompare);
+      }
+      if ((x->right != &(_it->nil)) and (x->right->max_high >= search_int.GetLowPoint())) {
+        
+        nodes.push_back(std::make_pair(x->right, x->right->max_timestamp));
+        std::push_heap(nodes.begin(), nodes.end(), heapCompare);
     }
-    if (x->right != &(_it->nil) and x->right->max_high >= search_int.GetLowPoint()) {
-      
-      nodes.push_back(x->right);
-      std::push_heap(nodes.begin(), nodes.end(), heapCompare);
     }
     
-    if (*(x->interval) * search_int) {
+    if (*(x->interval) * search_int) { // x intersects query interval
       
-      *_ret_int = *(x->interval);
-      return true;
+      if (x->interval->GetTimeStamp() < p) {
+        
+        // reinsert older intersecting interval into heap with actual timestamp
+        nodes.push_back(std::make_pair(x, x->interval->GetTimeStamp()));
+        std::push_heap(nodes.begin(), nodes.end(), heapCompare);
+        
+        // mark as explored
+        explored.insert(x);
+
+      }
+      else {
+        
+        *_ret_int = *(x->interval);
+        return true;
+      }
     }
+    
   }
 }
 
@@ -747,6 +772,7 @@ if (iterator_in_use) {
   }
   
   nodes.clear();
+  explored.clear();
   iterator_in_use = false;
 }
 };
@@ -763,7 +789,7 @@ if (_it->root != &(_it->nil) and !(_it->iterator_in_use)) {
   search_int = TwoDInterval("", min, max, 0);
   iterator_in_use = true;
   
-  nodes.push_back(_it->root);
+  nodes.push_back(std::make_pair(_it->root, _it->root->max_timestamp));
   
   return true;
 }
