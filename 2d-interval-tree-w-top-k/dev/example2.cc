@@ -66,6 +66,10 @@ while(it.next()) {
 // Releases a for inserts, deletes and iteration by other iterators
 it.stop();
 
+//
+std::cout<<std::endl<<"> Inserting interval (0+3, e, z, 32) into A:"<<std::endl;
+a.insertInterval("0+3", "e", "z", 32);
+
 // Restart it with new search interval
 std::cout<<std::endl<<"> All top intervals that overlap with (h,p) in A:"<<std::endl;
 it.restart("h","p");
