@@ -65,6 +65,8 @@ nil.is_red = false;
 
 iterator_in_use = false;
 iterator = nullptr;
+
+storage.reserve(1000000);
 };
 
 
@@ -116,6 +118,7 @@ try {
   if (id == "")
     throw std::runtime_error("Empty interval ID string");
   
+//std::cout<<"Insert Checkpoint 1\n";
   TwoDITNode *z = new TwoDITNode;
   
   std::list<std::string> r;
@@ -124,19 +127,25 @@ try {
   if (ids.find(r.front()) == ids.end()) {
     // create empty unordered_set for new key
     ids[r.front()] = std::unordered_set<std::string>();
+//std::cout<<"Insert Checkpoint 2a\n";
   }
   else if (ids[r.front()].find(r.back()) != ids[r.front()].end()) {
     // existing id is being rewritten, so delete the old interval from storage
     deleteInterval(id);
+//std::cout<<"Insert Checkpoint 2b\n";
   }
   
   ids[r.front()].insert(r.back());
+//std::cout<<"Insert Checkpoint 3\n";
   
   storage[id]=TwoDInterval(id, minKey, maxKey, maxTimestamp);
   storage.find(id)->second.tree_node = z;
+//std::cout<<"Insert Checkpoint 4\n";
   
-  z->interval = &(storage.find(id)->second);
+  //z->interval = &(storage.find(id)->second);
+  z->interval_id = id;
   treeInsert(z);
+//std::cout<<"Insert Checkpoint 5\n";
     
   if (++sync_counter > sync_threshold) { sync(); }
 }
@@ -156,16 +165,20 @@ if(iterator_in_use) {
 
 if (storage.find(id) != storage.end()) {
   
+//std::cout<<"Delete Checkpoint 1\n";
   std::list<std::string> r;
   split(r, id, id_delim);
   
   ids[r.front()].erase(r.back());
   if (ids[r.front()].empty())
     ids.erase(r.front());
+//std::cout<<"Delete Checkpoint 2\n";
   
   treeDelete(storage.find(id)->second.tree_node);
+//std::cout<<"Delete Checkpoint 3\n";
 
   storage.erase(id);
+//std::cout<<"Delete Checkpoint 4\n";
 
   if (++sync_counter > sync_threshold) { sync(); }
 }
@@ -257,7 +270,7 @@ void TwoDITwTopK::storagePrint() const {
 
 for (std::unordered_map<std::string, TwoDInterval>::const_iterator it = storage.begin(); it != storage.end(); it++) {
   std::cout<<"("<<it->second.GetId()<<","<<it->second.GetLowPoint()<<","<<it->second.GetHighPoint()
-        <<","<<it->second.GetTimeStamp()<<")"<<it->second.tree_node->interval->GetId()<<"\n";
+        <<","<<it->second.GetTimeStamp()<<")"<<storage.at(it->second.tree_node->interval_id).GetId()<<"\n";
 }
 };
 
@@ -287,8 +300,8 @@ while (!nodes.empty()) {
     level++;
   }
   
-  buffer<<"("<<x->interval->GetId()<<","<<x->interval->GetLowPoint()<<","<<x->interval->GetHighPoint()
-        <<","<<x->interval->GetTimeStamp()<<")";
+  buffer<<"("<<storage.at(x->interval_id).GetId()<<","<<storage.at(x->interval_id).GetLowPoint()<<","<<storage.at(x->interval_id).GetHighPoint()
+        <<","<<storage.at(x->interval_id).GetTimeStamp()<<")";
   line1<<std::setw(13)<<buffer.str();
   buffer.str(std::string());
 
@@ -298,19 +311,19 @@ while (!nodes.empty()) {
   
   if (x->left != &nil) {
     nodes.push_back(std::make_pair(x->left, depth+1));
-    buffer<<'/'<<x->left->interval->GetId();
+    buffer<<'/'<<storage.at(x->left->interval_id).GetId();
   }
   buffer<<"    ";
   
   if (x->right != &nil) {
     nodes.push_back(std::make_pair(x->right, depth+1));
-    buffer<<'\\'<<x->right->interval->GetId();
+    buffer<<'\\'<<storage.at(x->right->interval_id).GetId();
   }
   line3<<std::setw(13)<<buffer.str();
   buffer.str(std::string());
 }
 
-std::cout<<line1.str()<<std::endl<<line2.str()<<std::endl<<line3.str()<<std::endl;
+std::cout<<line1.str()<<std::endl<<line2.str()<<std::endl;
 };
 
 
@@ -327,8 +340,8 @@ void TwoDITwTopK::treePrintInOrderRecursive(TwoDITNode* x, const int &depth) con
 
 if (x != &nil) {
   treePrintInOrderRecursive(x->left, depth + 1);
-  std::cout<<" ("<<x->interval->GetId()<<","<<x->interval->GetLowPoint()<<","<<x->interval->GetHighPoint()
-           <<","<<x->interval->GetTimeStamp()<<"):("<<x->max_high<<","<<x->max_timestamp
+  std::cout<<" ("<<storage.at(x->interval_id).GetId()<<","<<storage.at(x->interval_id).GetLowPoint()<<","<<storage.at(x->interval_id).GetHighPoint()
+           <<","<<storage.at(x->interval_id).GetTimeStamp()<<"):("<<x->max_high<<","<<x->max_timestamp
            <<","<<(x->is_red ? 'R' : 'B')<<","<<depth<<")";
   treePrintInOrderRecursive(x->right, depth + 1);
 }
@@ -339,8 +352,12 @@ if (x != &nil) {
 void TwoDITwTopK::treeInsert(TwoDITNode* z) {
 TwoDITNode *y = &nil, *x = root;
 
-z->max_high = z->interval->GetHighPoint();
-z->max_timestamp = z->interval->GetTimeStamp();
+z->max_high = storage.at(z->interval_id).GetHighPoint();
+z->max_timestamp = storage.at(z->interval_id).GetTimeStamp();
+
+//std::cout<<"treeInsert: ("<<storage.at(z->interval_id).GetId()<<","<<storage.at(z->interval_id).GetLowPoint()<<","
+//         <<storage.at(z->interval_id).GetHighPoint()<<","<<storage.at(z->interval_id).GetTimeStamp()
+//         <<"):("<<z->max_high<<","<<z->max_timestamp<<","<<(z->is_red ? 'R' : 'B')<<")\n";
 
 while (x != &nil) {
   y = x;
@@ -350,7 +367,7 @@ while (x != &nil) {
   if (y->max_timestamp < z->max_timestamp)
     y->max_timestamp = z->max_timestamp;
   
-  if (z->interval->GetLowPoint() < x->interval->GetLowPoint())
+  if (storage.at(z->interval_id).GetLowPoint() < storage.at(x->interval_id).GetLowPoint())
     x = x->left;
   else
     x = x->right;
@@ -360,7 +377,7 @@ z->parent = y;
 if (y == &nil)
   root = z;
 else
-  if (z->interval->GetLowPoint() < y->interval->GetLowPoint())
+  if (storage.at(z->interval_id).GetLowPoint() < storage.at(y->interval_id).GetLowPoint())
     y->left = z;
   else
     y->right = z;
@@ -370,6 +387,7 @@ z->right = &nil;
 z->is_red = true;
 
 treeInsertFixup(z);
+//std::cout<<"treeInsert successful\n";
 };
 
 
@@ -422,45 +440,62 @@ root->is_red = false;
 
 //
 void TwoDITwTopK::treeDelete(TwoDITNode* z) {
-TwoDITNode *y = z, *x, *w;
+TwoDITNode *y = z, *x;
 bool y_orig_is_red = y->is_red;
 
 
 if (z->left == &nil) {
+//std::cout<<"delete case 1 ("<<storage.at(z->interval_id).GetId()<<")\n";
   x = z->right;
   treeTransplant(z, z->right);
-  if (z->right != &nil)
-    treeMaxFieldsFixup(z->right->parent);
+  //treeMaxFieldsFixup(z->parent);
+//std::cout<<"treeDelete Checkpoint 1a\n";
 }
 else if (z->right == &nil) {
+//std::cout<<"delete case 2 ("<<storage.at(z->interval_id).GetId()<<")\n";
   x = z->left;
   treeTransplant(z, z->left);
-  if (z->left != &nil)
-    treeMaxFieldsFixup(z->left->parent);
+  //treeMaxFieldsFixup(z->parent);
+//std::cout<<"treeDelete Checkpoint 1b\n";
 }
 else {
   y = treeMinimum(z->right);
   y_orig_is_red = y->is_red;
   x = y->right;
-  if (y->parent == z)
+  if (y->parent == z) {
     x->parent = y;
+//std::cout<<"delete case 3 ("<<storage.at(z->interval_id).GetId()<<")\n";
+//std::cout<<"treeDelete Checkpoint 1c\n";
+  }
   else {
     treeTransplant(y, y->right);
     y->right = z->right;
     y->right->parent = y;
-    treeMaxFieldsFixup(y);
+    //treeMaxFieldsFixup(y);
+//std::cout<<"delete case 4 ("<<storage.at(z->interval_id).GetId()<<")\n";
+//std::cout<<"treeDelete Checkpoint 1d\n";
   }
   treeTransplant(z,y);
   y->left = z->left;
   y->left->parent = y;
   y->is_red = z->is_red;
-  treeMaxFieldsFixup(y);
+  //treeMaxFieldsFixup(y);
 }
 
+//std::cout<<"treeDelete Checkpoint 2\n";
+//treePrintLevelOrder();
+//std::cout<<"\n";
 if (!y_orig_is_red)
   treeDeleteFixup(x);
+//std::cout<<"treeDelete Checkpoint 3\n";
+//treePrintLevelOrder();
+//std::cout<<"\n";
+//std::cout<<"starting fixup from ("<<storage.at(y->parent->interval_id).GetId()<<")\n";
+//treeMaxFieldsFixup(y->parent);
+//std::cout<<"treeDelete Checkpoint 4\n";
 
 delete z;
+//std::cout<<"treeDelete Checkpoint 5\n";
 };
 
 
@@ -574,8 +609,13 @@ else
 y->left= x;
 x->parent = y;
 
+//std::cout<<"right rotate, setting y:mh:"<<x->max_high<<" x:"<<storage.at(x->interval_id).GetId()<<" y:"<<storage.at(y->interval_id).GetId()<<"\n";
+//std::cout<<"right rotate, setting y:mt:"<<x->max_timestamp<<"\n";
+y->max_high = x->max_high;
+y->max_timestamp = x->max_timestamp;
 treeSetMaxFields(x);
-treeSetMaxFields(y);
+//std::cout<<"right rotate, setting x:mh:"<<x->max_high<<"\n";
+//std::cout<<"right rotate, setting x:mt:"<<x->max_timestamp<<"\n";
 };
 
 
@@ -599,8 +639,9 @@ else
 y->right= x;
 x->parent = y;
 
+y->max_high = x->max_high;
+y->max_timestamp = x->max_timestamp;
 treeSetMaxFields(x);
-treeSetMaxFields(y);
 };
 
 
@@ -633,21 +674,21 @@ void TwoDITwTopK::treeSetMaxFields(TwoDITNode* x) {
 
 if (x->left != &nil)
   if (x->right != &nil) {
-    x->max_high = max3<std::string>(x->interval->GetHighPoint(), x->left->max_high, x->right->max_high);
-    x->max_timestamp = max3<uint64_t>(x->interval->GetTimeStamp(), x->left->max_timestamp, x->right->max_timestamp);
+    x->max_high = max3<std::string>(storage.at(x->interval_id).GetHighPoint(), x->left->max_high, x->right->max_high);
+    x->max_timestamp = max3<uint64_t>(storage.at(x->interval_id).GetTimeStamp(), x->left->max_timestamp, x->right->max_timestamp);
   }
   else {
-    x->max_high = max2<std::string>(x->interval->GetHighPoint(), x->left->max_high);
-    x->max_timestamp = max2<uint64_t>(x->interval->GetTimeStamp(), x->left->max_timestamp);
+    x->max_high = max2<std::string>(storage.at(x->interval_id).GetHighPoint(), x->left->max_high);
+    x->max_timestamp = max2<uint64_t>(storage.at(x->interval_id).GetTimeStamp(), x->left->max_timestamp);
   }
 else
   if (x->right != &nil) {
-    x->max_high = max2<std::string>(x->interval->GetHighPoint(), x->right->max_high);
-    x->max_timestamp = max2<uint64_t>(x->interval->GetTimeStamp(), x->right->max_timestamp);
+    x->max_high = max2<std::string>(storage.at(x->interval_id).GetHighPoint(), x->right->max_high);
+    x->max_timestamp = max2<uint64_t>(storage.at(x->interval_id).GetTimeStamp(), x->right->max_timestamp);
   }
   else {
-    x->max_high = x->interval->GetHighPoint();
-    x->max_timestamp = x->interval->GetTimeStamp();
+    x->max_high = storage.at(x->interval_id).GetHighPoint();
+    x->max_timestamp = storage.at(x->interval_id).GetTimeStamp();
   }
 };
 
@@ -703,7 +744,7 @@ bool TopKIterator::next() {
 if (iterator_in_use) {
   
   TwoDITNode *x;
-  uint64_t p;
+  uint64_t p, t;
   
   while (!nodes.empty()) {
     
@@ -724,15 +765,16 @@ if (iterator_in_use) {
         
         nodes.push_back(std::make_pair(x->right, x->right->max_timestamp));
         std::push_heap(nodes.begin(), nodes.end(), heapCompare);
-    }
+      }
     }
     
-    if (*(x->interval) * search_int) { // x intersects query interval
+    if (_it->storage.at(x->interval_id) * search_int) { // x intersects query interval
       
-      if (x->interval->GetTimeStamp() < p) {
+      t = _it->storage.at(x->interval_id).GetTimeStamp();
+      if (t < p) {
         
         // reinsert older intersecting interval into heap with actual timestamp
-        nodes.push_back(std::make_pair(x, x->interval->GetTimeStamp()));
+        nodes.push_back(std::make_pair(x, t));
         std::push_heap(nodes.begin(), nodes.end(), heapCompare);
         
         // mark as explored
@@ -741,7 +783,7 @@ if (iterator_in_use) {
       }
       else {
         
-        *_ret_int = *(x->interval);
+        *_ret_int = _it->storage.at(x->interval_id);
         return true;
       }
     }

@@ -103,5 +103,7 @@ while(it.next())
   std::cout<<"("<<r.GetId()<<", "<<r.GetLowPoint()<<", "<<r.GetHighPoint()<<", "<<r.GetTimeStamp()<<")"<<std::endl;
 it.stop(); //release a
 
+std::cout<<std::endl;
+
 };
 

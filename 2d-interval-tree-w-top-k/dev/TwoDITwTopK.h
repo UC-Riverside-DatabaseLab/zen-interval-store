@@ -52,7 +52,8 @@ class TwoDITNode {
 public:
   TwoDITNode() : is_red(false) {};
 
-  TwoDInterval *interval;
+  //TwoDInterval *interval;
+  std::string interval_id;
   bool is_red;
   std::string max_high;
   uint64_t max_timestamp;
