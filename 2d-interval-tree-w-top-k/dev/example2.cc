@@ -63,10 +63,7 @@ while(it.next()) {
     break;
 }
 
-// Releases a for inserts, deletes and iteration by other iterators
-it.stop();
-
-//
+// Insert releases a for inserts, deletes and iteration by other iterators
 std::cout<<std::endl<<"> Inserting interval (0+3, e, z, 32) into A:"<<std::endl;
 a.insertInterval("0+3", "e", "z", 32);
 

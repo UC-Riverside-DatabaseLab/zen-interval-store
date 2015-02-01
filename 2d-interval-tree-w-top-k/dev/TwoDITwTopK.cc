@@ -113,7 +113,7 @@ void TwoDITwTopK::insertInterval(const std::string &id, const std::string &minKe
 
 try {
   if (iterator_in_use)
-    throw std::runtime_error("Interval tree locked by iterator.");
+    iterator->stop();
   
   if (id == "")
     throw std::runtime_error("Empty interval ID string");
@@ -158,10 +158,8 @@ catch(std::exception &e) {
 //
 void TwoDITwTopK::deleteInterval(const std::string &id) {
 
-if(iterator_in_use) {
-  std::cerr<<std::endl<<"Delete failure: Interval tree locked by iterator."<<std::endl;
-  return;
-}
+if(iterator_in_use)
+  iterator->stop();
 
 if (storage.find(id) != storage.end()) {
   
