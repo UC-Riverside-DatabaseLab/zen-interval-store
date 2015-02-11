@@ -67,6 +67,10 @@ while(it.next()) {
 std::cout<<std::endl<<"> Inserting interval (0+3, e, z, 32) into A:"<<std::endl;
 a.insertInterval("0+3", "e", "z", 32);
 
+//
+std::cout<<std::endl<<"> Tree in A:"<<std::endl;
+a.treePrintLevelOrder();
+
 // Restart it with new search interval
 std::cout<<std::endl<<"> All top intervals that overlap with (h,p) in A:"<<std::endl;
 it.restart("h","p");
