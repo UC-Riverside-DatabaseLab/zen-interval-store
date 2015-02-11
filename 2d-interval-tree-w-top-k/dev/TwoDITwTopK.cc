@@ -624,10 +624,19 @@ v->parent = u->parent;
 //
 void TwoDITwTopK::treeMaxFieldsFixup(TwoDITNode* x) {
 
+std::string old_high;
+uint64_t old_timestamp;
+
 while (x != &nil) {
-
+  
+  old_high = x->max_high;
+  old_timestamp = x->max_timestamp;
   treeSetMaxFields(x);
-
+  
+  // early exemption
+  if (x->max_high == old_high and x->max_timestamp == old_timestamp)
+    break;
+  
   x = x->parent;
 }
 };
