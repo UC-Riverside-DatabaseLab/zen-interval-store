@@ -80,9 +80,9 @@ a.insertInterval("0+4", "c", "o", 28);
 //a.treePrintLevelOrder();
 
 a.insertInterval("8", "b", "t", 30);
-std::cout<<std::endl<<"> Tree in A:"<<std::endl;
+//std::cout<<std::endl<<"> Tree in A:"<<std::endl;
 //a.treePrintInOrder();
-a.treePrintLevelOrder();
+//a.treePrintLevelOrder();
 
 
 //
@@ -112,7 +112,7 @@ a.deleteInterval("4");
 //
 std::cout<<std::endl<<"> Tree in A:"<<std::endl;
 //a.treePrintInOrder();
-a.treePrintLevelOrder();
+//a.treePrintLevelOrder();
 
 
 // Save state to sync file
@@ -129,7 +129,7 @@ a.deleteAllIntervals("0");
 
 //
 std::cout<<std::endl<<"> Tree in A:"<<std::endl;
-a.treePrintLevelOrder();
+//a.treePrintLevelOrder();
 
 
 std::cout<<std::endl<<"> Top-5 intervals that overlap with (n,o) in A:"<<std::endl;
@@ -141,7 +141,7 @@ for(std::vector<TwoDInterval>::const_iterator it = r.begin(); it != r.end(); it+
 
 //
 std::cout<<std::endl<<"> Tree in B:"<<std::endl;
-b.treePrintLevelOrder();
+//b.treePrintLevelOrder();
 
 
 std::cout<<std::endl<<"> Top-5 intervals that overlap with (n,o) in B:"<<std::endl;
