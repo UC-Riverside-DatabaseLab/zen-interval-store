@@ -1,0 +1,12 @@
+package ZenDurability;
+
+message Interval {
+  required string id = 1;
+  required string low = 2;
+  required string high = 3;
+  required uint64 timestamp = 4;
+}
+
+message IntervalSet {
+  repeated Interval interval = 1;
+}
