@@ -46,8 +46,6 @@ for (int i = 0; i < 1000000; i++) {
     o1<<i<<'\t'<<e<<std::endl;
     e=0;
   }
-  else
-    a.insertInterval(id, min, max, i);
   
 
   if (rand() % 10000 < 1) {
