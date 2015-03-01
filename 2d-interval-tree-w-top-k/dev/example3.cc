@@ -66,7 +66,18 @@ for (int i = 0; i < 1000000; i++) {
   max = std::to_string((n2 < 100000) ? n2 : 99999);
     //std::cout<<"\nDeleting all intervals starting with: "<<id<<"";
     auto start_3 = std::chrono::system_clock::now();
-    int index = 0;
+    
+    std::vector<TwoDInterval> r;
+a.topK(r, min, max, 5);
+//std::cout<<"\nRan topK successfully.\n";
+for(std::vector<TwoDInterval>::const_iterator it = r.begin(); it != r.end(); it++) {
+  it->GetId();
+  it->GetLowPoint();
+  it->GetHighPoint();
+  it->GetTimeStamp();
+}
+    
+    /*int index = 0;
     TwoDInterval r;
     TopKIterator it(a, r, min, max);
 
@@ -77,7 +88,7 @@ while(it.next()) {
   r.GetTimeStamp();
   if (++index == 5)
     break;
-}
+}*/
 
     auto end_3 = std::chrono::system_clock::now();
     auto elapsed = end_3 - start_3;
