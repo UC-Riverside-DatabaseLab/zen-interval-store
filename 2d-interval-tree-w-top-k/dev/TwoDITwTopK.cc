@@ -345,6 +345,13 @@ std::cout<<std::endl;
 
 
 //
+int TwoDITwTopK::treeHeight() const {
+
+return treeHeightRecursive(root);
+};
+
+
+//
 void TwoDITwTopK::treePrintInOrderRecursive(TwoDITNode* x, const int &depth) const {
 
 if (x != &nil) {
@@ -354,6 +361,21 @@ if (x != &nil) {
            <<","<<(x->is_red ? 'R' : 'B')<<","<<depth<<")";
   treePrintInOrderRecursive(x->right, depth + 1);
 }
+};
+
+
+//
+int TwoDITwTopK::treeHeightRecursive(TwoDITNode* x) const {
+
+if (x == &nil)
+  return 0;
+
+int hl = treeHeightRecursive(x->left), hr = treeHeightRecursive(x->right);
+
+if (hl > hr)
+  return hl + 1;
+
+return hr + 1;
 };
 
 

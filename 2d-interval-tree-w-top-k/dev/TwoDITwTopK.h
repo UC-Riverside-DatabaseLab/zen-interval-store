@@ -86,13 +86,14 @@ public:
   void storagePrint() const;
   void treePrintLevelOrder() const;
   void treePrintInOrder() const;
+  int treeHeight() const;
   
 private:
   
   void setDefaults();
   
   void treePrintInOrderRecursive(TwoDITNode* x, const int &depth) const;
-  int treeHeight();
+  int treeHeightRecursive(TwoDITNode* x) const
   void treeInsert(TwoDITNode* z);
   void treeInsertFixup(TwoDITNode* z);
   void treeDelete(TwoDITNode* z);
