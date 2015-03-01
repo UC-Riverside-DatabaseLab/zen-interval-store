@@ -37,8 +37,6 @@ public:
     return (otherInterval._high >= _low);
     }
 
-  //TwoDITNode* tree_node;
-
 protected:
   std::string _id;
   std::string _low;
@@ -53,7 +51,6 @@ public:
   TwoDITNode() : is_red(false) {};
 
   TwoDInterval interval;
-  //std::string interval_id;
   bool is_red;
   std::string max_high;
   uint64_t max_timestamp;

@@ -158,10 +158,8 @@ try {
   
   ids[r.front()].insert(r.back());
   
-  storage[id] = z; //TwoDInterval(id, minKey, maxKey, maxTimestamp);
-  //storage.find(id)->second.tree_node = z;
+  storage[id] = z;
   
-  //z->interval_id = id;
   z->interval = TwoDInterval(id, minKey, maxKey, maxTimestamp);
   treeInsert(z);
     
@@ -766,7 +764,7 @@ if (iterator_in_use) {
       t = x->interval.GetTimeStamp();
       if (t < p) {
         
-        // reinsert older intersecting interval into heap with actual timestamp
+        // reinsert older intersecting interval into heap with correct timestamp
         nodes.push_back(std::make_pair(x, t));
         std::push_heap(nodes.begin(), nodes.end(), heapCompare);
         
