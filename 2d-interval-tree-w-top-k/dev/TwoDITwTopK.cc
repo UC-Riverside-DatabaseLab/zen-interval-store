@@ -226,7 +226,7 @@ else
 
 
 //
-void TwoDITwTopK::topK(std::vector<TwoDInterval> &ret_value, const std::string &minKey, const std::string &maxKey, const uint32_t &k) {
+void TwoDITwTopK::topK(std::vector<TwoDInterval> &ret_value, const std::string &minKey, const std::string &maxKey) {
 
 TwoDInterval test("", minKey, maxKey, 0LL);
 TwoDITNode *x;
@@ -257,10 +257,6 @@ for (std::unordered_map<std::string, TwoDITNode*>::const_iterator it = storage.b
 std::sort(ret_value.begin(), ret_value.end(), std::greater<TwoDInterval>());
 //std::cout<<"topK: Checkpoint 4.\n";
 
-if (ret_value.size() > k) {
-  ret_value.erase(ret_value.begin() + k, ret_value.end());
-}
-//std::cout<<"topK: Checkpoint 5.\n";
 };
 
 

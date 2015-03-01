@@ -71,7 +71,7 @@ public:
   void deleteAllIntervals(const std::string &id_prefix);
   
   void getInterval(TwoDInterval &ret_interval, const std::string &id) const;
-  void topK(std::vector<TwoDInterval> &ret_value, const std::string &minKey, const std::string &maxKey, const uint32_t &k);
+  void topK(std::vector<TwoDInterval> &ret_value, const std::string &minKey, const std::string &maxKey);
   
   void sync() const;
 
