@@ -231,32 +231,11 @@ void TwoDITwTopK::topK(std::vector<TwoDInterval> &ret_value, const std::string &
 TwoDInterval test("", minKey, maxKey, 0LL);
 TwoDITNode *x;
 std::unordered_set<TwoDITNode*> found;
-//std::cout<<"topK: Checkpoint 1.\n";
 
-while(treeIntervalSearch(test, found, x)) {
+while(treeIntervalSearch(test, found, x))
   ret_value.push_back(x->interval);
-  //deleteInterval(ret_value.back().GetId());
-  
-}
-//std::cout<<"topK: Checkpoint 2.\n";
-
-//for (std::vector<TwoDInterval>::const_iterator it = ret_value.begin(); it != ret_value.end(); it++) {
-//  ret_value.push_back(it->second->interval);
-  //insertInterval(it->GetId(), it->GetLowPoint(), it->GetHighPoint(), it->GetTimeStamp());
-//}
-//std::cout<<"topK: Checkpoint 3.\n";
-
-/*
-for (std::unordered_map<std::string, TwoDITNode*>::const_iterator it = storage.begin(); it != storage.end(); it++) {
-  if (it->second->interval * test) {
-    ret_value.push_back(it->second->interval);
-  }
-}
-*/
 
 std::sort(ret_value.begin(), ret_value.end(), std::greater<TwoDInterval>());
-//std::cout<<"topK: Checkpoint 4.\n";
-
 };
 
 
@@ -399,7 +378,6 @@ return hr + 1;
 bool TwoDITwTopK::treeIntervalSearch(const TwoDInterval &test_interval, std::unordered_set<TwoDITNode*> &found, TwoDITNode *&x) const {
   
   x = root;
-//std::cout<<"treeIntervalSearch: Checkpoint 1.\n";
   
   while (x != &nil) {
   
