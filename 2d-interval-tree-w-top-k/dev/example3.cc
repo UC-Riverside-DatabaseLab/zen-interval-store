@@ -68,7 +68,7 @@ for (int i = 0; i < 1000000; i++) {
     auto start_3 = std::chrono::system_clock::now();
     
     std::vector<TwoDInterval> r;
-a.topK(r, min, max, 5);
+a.topK(r, min, max);
 //std::cout<<"\nRan topK successfully.\n";
 for(std::vector<TwoDInterval>::const_iterator it = r.begin(); it != r.end(); it++) {
   it->GetId();
